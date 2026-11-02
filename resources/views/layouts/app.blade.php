@@ -56,9 +56,15 @@
                             <span>Items</span><span class="text-xs font-normal">Coming soon</span>
                         </span>
                     @endif
-                    <span aria-disabled="true" title="Coming soon" class="flex cursor-not-allowed items-center justify-between rounded-md px-3 py-2.5 text-slate-400">
-                        <span>Orders</span><span class="text-xs font-normal">Coming soon</span>
-                    </span>
+                    @if (Route::has('orders.index'))
+                        <a href="{{ route('orders.index') }}" @class([
+                            'flex items-center rounded-md px-3 py-2.5 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-700',
+                            'bg-blue-50 text-blue-700' => request()->routeIs('orders.*'),
+                            'text-slate-600 hover:bg-slate-50 hover:text-blue-700' => ! request()->routeIs('orders.*'),
+                        ])>
+                            Orders
+                        </a>
+                    @endif
 
                     @if (Route::has('profile.edit'))
                         <a href="{{ route('profile.edit') }}" @class([
