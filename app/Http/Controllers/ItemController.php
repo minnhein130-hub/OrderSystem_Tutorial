@@ -4,7 +4,6 @@ namespace App\Http\Controllers;
 
 use App\Http\Requests\StoreItemRequest;
 use App\Http\Requests\UpdateItemRequest;
-use App\Models\Item;
 use App\Services\ItemService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -39,28 +38,35 @@ class ItemController extends Controller
             ->with('success', 'Item created successfully.');
     }
 
-    public function show(Item $item): View
+    public function show(int $item): View
     {
+        $item = $this->itemService->find($item);
+
         return view('items.show', compact('item'));
     }
 
-    public function edit(Item $item): View
+    public function edit(int $item): View
     {
+        $item = $this->itemService->find($item);
+
         return view('items.edit', compact('item'));
     }
 
-    public function update(UpdateItemRequest $request, Item $item): RedirectResponse
+    public function update(UpdateItemRequest $request, int $item): RedirectResponse
     {
-        $item = $this->itemService->update($item->id, $request->validated());
+        $item = $this->itemService->find($item);
+        $item = $this->itemService->update($item, $request->validated());
 
         return redirect()
             ->route('items.show', $item)
             ->with('success', 'Item updated successfully.');
     }
 
-    public function destroy(Item $item): RedirectResponse
+    public function destroy(int $item): RedirectResponse
     {
-        if (! $this->itemService->delete($item->id)) {
+        $item = $this->itemService->find($item);
+
+        if (! $this->itemService->delete($item)) {
             return redirect()
                 ->route('items.show', $item)
                 ->with('error', 'This item cannot be deleted because it is used in an order.');

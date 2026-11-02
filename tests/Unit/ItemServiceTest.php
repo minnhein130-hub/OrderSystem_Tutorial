@@ -2,6 +2,7 @@
 
 namespace Tests\Unit;
 
+use App\Models\Item;
 use App\Repositories\Contracts\ItemRepositoryInterface;
 use App\Services\ItemService;
 use Mockery;
@@ -14,12 +15,15 @@ class ItemServiceTest extends TestCase
 
     public function test_item_is_not_deleted_when_an_order_uses_it(): void
     {
+        $item = new Item;
+        $item->id = 123;
+
         $repository = Mockery::mock(ItemRepositoryInterface::class);
         $repository->shouldReceive('isUsedInOrder')->once()->with(123)->andReturn(true);
         $repository->shouldNotReceive('delete');
 
         $service = new ItemService($repository);
 
-        $this->assertFalse($service->delete(123));
+        $this->assertFalse($service->delete($item));
     }
 }

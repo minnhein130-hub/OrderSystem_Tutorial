@@ -3,7 +3,6 @@
 use App\Http\Controllers\ItemController;
 use App\Http\Controllers\OrderController;
 use App\Http\Controllers\ProfileController;
-use App\Services\ItemService;
 use App\Services\OrderService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
@@ -24,8 +23,9 @@ Route::middleware('auth')->group(function () {
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
 });
 
-Route::bind('item', fn (string $value) => app(ItemService::class)->find((int) $value));
-Route::resource('items', ItemController::class)->middleware('auth');
+Route::resource('items', ItemController::class)
+    ->middleware('auth')
+    ->whereNumber('item');
 
 Route::middleware('auth')->group(function () {
     Route::resource('orders', OrderController::class)->except('destroy')->whereNumber('order');

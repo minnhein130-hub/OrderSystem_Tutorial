@@ -42,18 +42,17 @@ class EloquentItemRepository implements ItemRepositoryInterface
     }
 
     #[Override]
-    public function update(int $id, array $data): Item
+    public function update(Item $item, array $data): Item
     {
-        $item = $this->find($id);
         $item->update($data);
 
-        return $item->refresh();
+        return $item;
     }
 
     #[Override]
-    public function delete(int $id): void
+    public function delete(Item $item): void
     {
-        $this->find($id)->delete();
+        $item->delete();
     }
 
     #[Override]

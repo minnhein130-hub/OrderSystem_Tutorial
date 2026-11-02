@@ -16,6 +16,68 @@ class ItemsTest extends TestCase
     {
         $this->get(route('items.index'))->assertRedirect(route('login'));
         $this->get(route('items.create'))->assertRedirect(route('login'));
+        $this->get(route('items.show', 1))->assertRedirect(route('login'));
+        $this->get(route('items.edit', 1))->assertRedirect(route('login'));
+        $this->post(route('items.store'))->assertRedirect(route('login'));
+        $this->put(route('items.update', 1))->assertRedirect(route('login'));
+        $this->delete(route('items.destroy', 1))->assertRedirect(route('login'));
+    }
+
+    public function test_item_create_and_edit_pages_can_be_opened(): void
+    {
+        $user = User::factory()->create();
+        $item = Item::query()->create([
+            'name' => 'Editable item',
+            'description' => 'Item description',
+            'price' => '10.00',
+        ]);
+
+        $this->actingAs($user)
+            ->get(route('items.create'))
+            ->assertOk()
+            ->assertSee('Create Item');
+
+        $this->get(route('items.edit', $item))
+            ->assertOk()
+            ->assertSee('Editable item')
+            ->assertSee('Save Changes');
+    }
+
+    public function test_missing_item_ids_return_not_found_for_item_actions(): void
+    {
+        $user = User::factory()->create();
+        $missingId = 999999;
+        $payload = [
+            'name' => 'Missing item',
+            'description' => null,
+            'price' => '10.00',
+        ];
+
+        $this->actingAs($user)
+            ->get(route('items.show', $missingId))
+            ->assertNotFound();
+
+        $this->get(route('items.edit', $missingId))->assertNotFound();
+        $this->put(route('items.update', $missingId), $payload)->assertNotFound();
+        $this->delete(route('items.destroy', $missingId))->assertNotFound();
+    }
+
+    public function test_nonnumeric_item_route_parameters_return_not_found(): void
+    {
+        $user = User::factory()->create();
+        $payload = [
+            'name' => 'Invalid item route',
+            'description' => null,
+            'price' => '10.00',
+        ];
+
+        $this->actingAs($user)
+            ->get('/items/not-a-number')
+            ->assertNotFound();
+
+        $this->get('/items/not-a-number/edit')->assertNotFound();
+        $this->put('/items/not-a-number', $payload)->assertNotFound();
+        $this->delete('/items/not-a-number')->assertNotFound();
     }
 
     public function test_items_list_can_search_names_and_descriptions_and_keep_search_in_pagination(): void
@@ -131,7 +193,7 @@ class ItemsTest extends TestCase
 
         $itemService = \Mockery::mock(ItemService::class);
         $itemService->shouldReceive('find')->once()->with($item->id)->andReturn($item);
-        $itemService->shouldReceive('delete')->once()->with($item->id)->andReturn(false);
+        $itemService->shouldReceive('delete')->once()->with($item)->andReturn(false);
         $this->instance(ItemService::class, $itemService);
 
         $this->actingAs($user)

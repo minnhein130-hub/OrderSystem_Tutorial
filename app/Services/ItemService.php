@@ -31,9 +31,9 @@ class ItemService
     }
 
     /** @param array{name: string, description?: string|null, price: string|int|float} $data */
-    public function update(int $id, array $data): Item
+    public function update(Item $item, array $data): Item
     {
-        return $this->itemRepository->update($id, $data);
+        return $this->itemRepository->update($item, $data);
     }
 
     /**
@@ -41,14 +41,16 @@ class ItemService
      *
      * @return bool True when the item was deleted, false when it is in use.
      */
-    public function delete(int $id): bool
+    public function delete(Item $item): bool
     {
+        $id = $item->id;
+
         if ($this->itemRepository->isUsedInOrder($id)) {
             return false;
         }
 
         try {
-            $this->itemRepository->delete($id);
+            $this->itemRepository->delete($item);
         } catch (QueryException $exception) {
             // A restrictive order_items foreign key can catch a reference added
             // after the first check. Convert that case into the same safe result.

@@ -15,9 +15,9 @@ interface ItemRepositoryInterface
     public function create(array $data): Item;
 
     /** @param array{name: string, description?: string|null, price: string|int|float} $data */
-    public function update(int $id, array $data): Item;
+    public function update(Item $item, array $data): Item;
 
-    public function delete(int $id): void;
+    public function delete(Item $item): void;
 
     public function isUsedInOrder(int $id): bool;
 }
